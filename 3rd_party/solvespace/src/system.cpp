@@ -592,8 +592,6 @@ SolveResult System::Solve(Group *g, int *rank, int *dof, List<hConstraint> *bad,
     // the system is consistent yet, but if it isn't then we'll catch that
     // later.
 
-    unsigned int n_eq0 = 0, n_param0 = 0;
-    unsigned int nref1 = 0;
     int tag1;
     int alone = 1;
     std::list<std::map<unsigned int, Equation *>> param_exprs;
@@ -668,19 +666,6 @@ SolveResult System::Solve(Group *g, int *rank, int *dof, List<hConstraint> *bad,
     tag1 = 1000;
     while(1) {
         std::map<unsigned int, Equation *> param_expr;
-        n_eq0    = 0;
-        n_param0 = 0;
-        for(auto &e : eq) {
-            if(e.tag == 0)
-                n_eq0++;
-        }
-        for(auto &p : param) {
-            if(p.tag == 0)
-                n_param0++;
-        }
-        //std::cout << "neq0:" << n_eq0 << " nparam0:" << n_param0 << " tag1:" << tag1 << std::endl;
-
-        nref1 = 0;
 
 
         for(auto &p : param) {
@@ -737,7 +722,6 @@ SolveResult System::Solve(Group *g, int *rank, int *dof, List<hConstraint> *bad,
                 if(can_remove) {
                     p.tag    = tag1;
                     eq1->tag = tag1;
-                    nref1++;
                     param_expr.emplace(p.h.v, eq1);
                 }
             }
