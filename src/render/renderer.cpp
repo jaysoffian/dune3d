@@ -151,7 +151,7 @@ void Renderer::render(const Document &doc, const UUID &current_group, const IDoc
     }
 
 
-    if (!sr) {
+    if (!sr && !m_workspace_view->show_only_solid_models()) {
         set_chunk_from_group(*m_current_group);
         for (const auto &[uu, el] : doc.m_constraints) {
             if (m_current_group->m_uuid != el->m_group)
@@ -180,6 +180,9 @@ void Renderer::render(const Document &doc, const UUID &current_group, const IDoc
 void Renderer::render(const Entity &entity)
 {
     if (!entity.m_visible)
+        return;
+    if (m_workspace_view->show_only_solid_models() && entity.get_type() != Entity::Type::DOCUMENT
+        && entity.get_type() != Entity::Type::STEP)
         return;
     if (entity.m_construction
         && ((entity.m_group != m_current_group->m_uuid
@@ -451,10 +454,13 @@ void Renderer::visit(const EntityWorkplane &wrkpl)
 
 void Renderer::visit(const EntitySTEP &en)
 {
-    m_ca.add_selectable(m_ca.draw_point(en.m_origin, IconID::POINT_DIAMOND),
-                        SelectableRef{SelectableRef::Type::ENTITY, en.m_uuid, 1});
+    const bool show_only_solids = m_workspace_view->show_only_solid_models();
 
-    if (!en.m_show_points) {
+    if (!show_only_solids)
+        m_ca.add_selectable(m_ca.draw_point(en.m_origin, IconID::POINT_DIAMOND),
+                            SelectableRef{SelectableRef::Type::ENTITY, en.m_uuid, 1});
+
+    if (!en.m_show_points && !show_only_solids) {
         for (const auto &[idx, p] : en.m_anchors) {
             m_ca.add_selectable(m_ca.draw_point(en.transform(p), IconID::POINT_TRIANGLE_DOWN),
                                 SelectableRef{SelectableRef::Type::ENTITY, en.m_uuid, idx});
@@ -484,7 +490,7 @@ void Renderer::visit(const EntitySTEP &en)
                 }
             }
         }
-        if (en.m_show_points) {
+        if (en.m_show_points && !show_only_solids) {
             unsigned int idx = EntitySTEP::s_imported_point_offset;
             for (auto &pt : en.m_imported->result.points) {
                 m_ca.add_selectable(m_ca.draw_point(en.transform({pt.x, pt.y, pt.z}), IconID::POINT_TRIANGLE_DOWN),
