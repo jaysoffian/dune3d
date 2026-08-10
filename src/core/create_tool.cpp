@@ -238,6 +238,8 @@ std::unique_ptr<ToolBase> Core::create_tool(ToolID tool_id, ToolBase::Flags flag
         return std::make_unique<ToolConstrainPointOnCircle>(tool_id, *this, m_intf, flags);
 
     case ToolID::CONSTRAIN_POINT_ON_BEZIER:
+    case ToolID::CONSTRAIN_LINE_TANGENT_ON_BEZIER:
+    case ToolID::CONSTRAIN_LINE_PERPENDICULAR_ON_BEZIER:
         return std::make_unique<ToolConstrainPointOnBezier>(tool_id, *this, m_intf, flags);
 
     case ToolID::CONSTRAIN_POINT_LINE_DISTANCE:
